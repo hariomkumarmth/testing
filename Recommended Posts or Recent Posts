@@ -1,0 +1,82 @@
+<?php
+    $tags = wp_get_post_tags($post->ID);
+    $tag_ids = array();
+    foreach($tags as $individual_tag)
+     $tag_ids[] = $individual_tag ->term_id;
+    $cats = wp_get_post_categories($post->ID);
+    $post_ids = array();
+    $post_ids[] = $post->ID;
+    $args = array(
+        'post__not_in' => $post_ids,
+        'showposts' => 10,
+        'tax_query' => array(
+            'relation' => 'OR',
+            array(
+                'taxonomy' => 'post_tag',
+                'field' => 'id',
+                'terms' => $tag_ids,
+            ),
+            array(
+                'taxonomy' => 'category',
+                'field' => 'cat_ID',
+                'terms' => $cats,
+            ),
+        )
+    );
+    $my_query = new wp_query($args);
+    if($my_query->have_posts()){
+        echo '
+        <div class="rec-posts">
+            <div class="row">
+                <div class="col-md-12 rec-title"><h4>Recommended Posts</h4>
+                </div> ';
+        while ($my_query->have_posts()){
+            $my_query->the_post();
+            $post_ids[] = $post->ID;
+?>
+            <div class="col-md-4 col-sm-4">
+                <article class="rec-post">
+                    <figure><a href="<?php the_permalink(); ?>"><?php the_post_thumbnail( array(50, 50) ); ?></a>
+                    </figure>
+                    <h5>
+                        <a href="<?php the_permalink(); ?>"><?php the_title(); ?>
+                        </a>
+                    </h5>
+                    <p><?php the_time(get_option( 'date_format' )) ?> </p>  
+                </article>
+            </div>
+        <?php }
+        echo "</div></div>";
+    }
+    else
+        echo '<div class="rec-posts">
+                <div class="row">
+                    <div class="col-md-12"><h4>'. esc_html__('Recent Posts','thc') .'</h4></div>';
+wp_reset_postdata();
+
+$rel_count = $my_query->found_posts;
+if ($rel_count < 3){
+$rec_count = 10;
+$args = array(
+        'post__not_in' => $post_ids,
+        'showposts' => $rec_count,
+        );
+$rec_query = new wp_query($args);
+    if($rec_query->have_posts()){
+        while ($rec_query->have_posts()){
+        $rec_query->the_post();
+?>
+            <div class="col-md-4 col-sm-4">
+                <article class="rec-post">
+                    <figure><a href="<?php the_permalink(); ?>"><?php the_post_thumbnail( array(50, 50) ); ?></a></figure>
+                    <h5><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h5>
+                    <p><?php the_time(get_option( 'date_format' )) ?> </p>  
+                </article>
+            </div>
+        <?php }
+        echo '</div></div>';
+    }
+    wp_reset_postdata();
+}
+
+?>   
