@@ -1,0 +1,9 @@
+
+if ( ! function_exists( 'weddingreval_theme_content_more' ) ) :
+// change content read  more link
+add_filter( 'excerpt_more', 'ept_theme_content_more' );
+add_filter( 'the_content_more_link', 'ept_theme_content_more' );
+function ept_theme_content_more($more) {
+    return '<div class="read-more"><a href="'.get_the_permalink().'">'.esc_html__( 'Read More',  'ept_theme').'</a></div>';
+}   
+endif;
