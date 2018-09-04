@@ -1,0 +1,82 @@
+ <?php
+               $feature_posts = get_posts(array(
+                'meta_query' => array(
+                    array(
+                        'key' => 'feature_post', 
+                        'value' => '"true"', 
+                        'compare' => 'LIKE'
+                    )
+                 )
+                ));
+              $i = 1; 
+              if ( $feature_posts ) {
+              foreach( $feature_posts as $post ): setup_postdata($post);
+              $categories = get_the_category(); 
+                  if( $i==1 ):?>
+                    <div class="col-md-8 col-sm-8">
+                  <article class="style3 style-alt">
+                    <a href="<?php the_permalink(); ?>">
+                      <div class="overlay overlay-02"></div>
+                      <div class="post-thumb">
+                        <div class="small-title cat"> 
+                        <?php if ( ! empty( $categories ) ) {
+                                echo '<a href="' . esc_url( get_category_link( $categories[0]->term_id ) ) . '">' . esc_html( $categories[0]->name ) . '</a>';
+                            }
+                            $src = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'blog-home-other' );
+                            $img_url = $src[0];
+                            // Image url
+                            ?>
+                            </div>
+                        <div class="post-excerpt">
+                          <div class="meta">
+                            <span class="date"><?php the_time('F jS, Y') ?></span>
+                          </div>
+                          <h3 class="h1 text-white"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+                          <div class="meta">
+                            <span class="author"><img src="<?php bloginfo('template_url'); ?>/img/avatar/1.jpg" class="img-circle" alt=""> by <?php the_author_posts_link() ?> </span>
+                            <span class="comment"><i class="fa fa-comment-o"></i> <?php echo get_comments_number(); ?></span>
+                            <span class="views"><i class="fa fa-eye"></i> <?php echo om_getViews($post->ID ) ?> views</span>
+                            
+                          </div>
+                        </div>
+                        <img src="<?php echo $img_url ?>" class="img-responsive" alt="<?php the_title(); ?>">
+                      </div>
+                    </a>
+                  </article>
+                </div>
+               
+                <?php else: 
+                $src = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'blog-home-other' );
+                $img_url = $src[0];
+                ?>
+                 <div class="col-md-4 col-sm-4">
+                  <article class="style4 style-alt margin-bottom-10">
+                    <a href="<?php the_permalink(); ?>">
+                      <div class="overlay overlay-02"></div>
+                      <div class="post-thumb">
+                        <div class="small-title cat">
+                            <?php if ( ! empty( $categories ) ) {
+                                echo '<a href="' . esc_url( get_category_link( $categories[0]->term_id ) ) . '">' . esc_html( $categories[0]->name ) . '</a>';
+                            }
+                            ?>
+                        </div>
+                        <div class="post-excerpt">
+                          <div class="meta">
+                            <span class="date"><?php the_time('F jS, Y') ?> </span>
+                          </div>
+                          <h5 class="text-white"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h5>
+                        </div>
+                        <img src="<?php echo $img_url ?>" class="img-responsive" alt="<?php the_title(); ?>">
+                      </div>
+                    </a>
+                 
+                  </article>
+                  </div>
+                <?php  endif;?>
+              
+                 <?php 
+                $i++; 
+                endforeach; 
+                wp_reset_postdata();
+              }
+                ?>
