@@ -1,9 +1,41 @@
 
-if ( ! function_exists( 'weddingreval_theme_content_more' ) ) :
 // change content read  more link
+/* Add extra body class */
+------------------------
+// change content read  more link
+if ( ! function_exists( 'weddingreval_theme_content_more' ) ) :
 add_filter( 'excerpt_more', 'ept_theme_content_more' );
 add_filter( 'the_content_more_link', 'ept_theme_content_more' );
 function ept_theme_content_more($more) {
     return '<div class="read-more"><a href="'.get_the_permalink().'">'.esc_html__( 'Read More',  'ept_theme').'</a></div>';
 }   
 endif;
+---------------------
+/* Add extra body class */
+add_filter( 'body_class', function( $classes ) {
+    switch (get_post_type()) {
+        case 'post':
+            $extra_body_class = 'single-news-page';
+            break;
+
+        case 'teammember':
+            $extra_body_class = 'single-team-page-area';
+            break;
+
+        default:
+            $extra_body_class = '';
+            break;
+    }
+    ( isset($_GET["portfolio_style"]) ) ? $portfolio_style = $_GET["portfolio_style"]  : $portfolio_style = softhopper_weddingreval('portfolio_style') ;
+    if ( weddingreval_theme_get_current_template() == "portfolio-page.php" && $portfolio_style == "three" ) {
+        $extra_body_class .= ' single-news-page portfolio4 ';
+    }
+
+    if ( weddingreval_theme_header_style() == "2" ) {
+        $extra_body_class .= ' home2 ';
+    }
+
+    $classes[] = $extra_body_class;
+    return $classes;
+} );
+----------------------
