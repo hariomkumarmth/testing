@@ -1,0 +1,14 @@
+/* Compress CSS Code  */
+if ( !function_exists( 'vce_compress_css_code' ) ) :
+	function vce_compress_css_code( $code ) {
+
+		// Remove Comments
+		$code = preg_replace( '!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $code );
+
+		// Remove tabs, spaces, newlines, etc.
+		$code = str_replace( array( "\r\n", "\r", "\n", "\t", '  ', '    ', '    ' ), '', $code );
+
+		return $code;
+	}
+endif;
+------------
