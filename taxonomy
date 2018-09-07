@@ -1,0 +1,211 @@
+/**
+ * Get term IDs by term slugs for specific taxonomy
+ *
+ * @param array   $slugs List of tag slugs
+ * @param string  $tax   Taxonomy name
+ * @return array List IDs
+ * @since  2.2
+ */
+
+if ( !function_exists( 'vce_get_tax_term_id_by_slug' ) ):
+	function vce_get_tax_term_id_by_slug( $slugs, $tax = 'post_tag' ) {
+
+		if ( empty( $slugs ) ) {
+			return '';
+		}
+
+		$ids = array();
+
+		foreach ( $slugs as $slug ) {
+			$tag = get_term_by( 'slug', trim( $slug ), $tax );
+			if ( !empty( $tag ) && isset( $tag->term_id ) ) {
+				$ids[] = $tag->term_id;
+			}
+		}
+
+		return $ids;
+
+	}
+endif;
+
+---------
+/**
+ * Get all taxonomies for custom post type
+ *
+ * @param unknown $cpt Custom post type ID
+ * @return array List of custom post types and taxonomies
+ * @since  2.3.1
+ */
+if ( !function_exists( 'vce_get_taxonomies' ) ) :
+	function vce_get_taxonomies( $cpt ) {
+
+		$taxonomies = get_taxonomies( array(
+				'object_type' => array( $cpt ),
+				'public' => true,
+				'show_ui' => true
+			),
+			'object' );
+
+		$output = array();
+
+		foreach ( $taxonomies as $taxonomy ) {
+
+			$tax = array();
+			$tax['id'] = $taxonomy->name;
+			$tax['name'] = $taxonomy->label;
+			$tax['hierarchical'] = $taxonomy->hierarchical;
+			if ( $tax['hierarchical'] ) {
+				$tax['terms'] = get_terms( $taxonomy->name, array( 'hide_empty' => false ) ); //false for testing - change to true
+			}
+
+			$output[] = $tax;
+		}
+
+		return $output;
+	}
+endif;
+---------------
+/**
+ * Get term IDs by term names for specific taxonomy
+ *
+ * @param array   $names List of term names
+ * @param string  $tax   Taxonomy name
+ * @return array List of term IDs
+ * @since  2.3.1
+ */
+
+if ( !function_exists( 'vce_get_tax_term_id_by_name' ) ):
+	function vce_get_tax_term_id_by_name( $names, $tax = 'post_tag' ) {
+
+		if ( empty( $names ) ) {
+			return '';
+		}
+
+		if ( !is_array( $names ) ) {
+			$names = explode( ",", $names );
+		}
+
+		$ids = array();
+
+		foreach ( $names as $name ) {
+			$tag = get_term_by( 'name', trim( $name ), $tax );
+			if ( !empty( $tag ) && isset( $tag->term_id ) ) {
+				$ids[] = $tag->term_id;
+			}
+		}
+		return $ids;
+
+	}
+endif;
+
+/**
+ * Get term names by term id for specific taxonomy
+ *
+ * @param array   $names List of term ids
+ * @param string  $tax   Taxonomy name
+ * @return array List of term names
+ * @since  2.3.1
+ */
+
+if ( !function_exists( 'vce_get_tax_term_name_by_id' ) ):
+	function vce_get_tax_term_name_by_id( $ids, $tax = 'post_tag' ) {
+
+		if ( empty( $ids ) ) {
+			return '';
+		}
+
+		$names = array();
+
+		foreach ( $ids as $id ) {
+			$tag = get_term_by( 'id', trim( $id ), $tax );
+			if ( !empty( $tag ) && isset( $tag->name ) ) {
+				$names[] = $tag->name;
+			}
+		}
+
+		$names = implode( ',', $names );
+
+		return $names;
+
+	}
+endif;
+------------
+/**
+ * Used for getting post type with all its taxonomies
+ *
+ * @return array
+ * @since    2.7.1
+ */
+if ( !function_exists( 'vce_get_post_type_with_taxonomies' ) ):
+	function vce_get_post_type_with_taxonomies( $post_type ) {
+
+		$post_type = get_post_type_object( $post_type );
+
+		if ( empty( $post_type ) )
+			return null;
+
+
+		$post_taxonomies = array();
+		$taxonomies = get_taxonomies( array(
+				'object_type' => array( $post_type->name ),
+				'public'      => true,
+				'show_ui'     => true,
+			), 'object' );
+
+		if ( !empty( $taxonomies ) ) {
+			foreach ( $taxonomies as $taxonomy ) {
+
+				$tax = array();
+				$tax['id'] = $taxonomy->name;
+				$tax['name'] = $taxonomy->label;
+				$tax['hierarchical'] = $taxonomy->hierarchical;
+				if ( $tax['hierarchical'] ) {
+					$tax['terms'] = get_terms( $taxonomy->name, array( 'hide_empty' => false ) );
+				}
+
+				$post_taxonomies[] = $tax;
+			}
+		}
+
+		if ( !empty( $post_taxonomies ) ) {
+			$post_type->taxonomies = $post_taxonomies;
+		}
+
+
+		return apply_filters( 'vce_modify_post_type_with_taxonomies', $post_type );
+	}
+endif;
+
+
+
+/**
+ * Get term slugs by term names for specific taxonomy
+ *
+ * @param string  $names List of tag names separated by comma
+ * @param string  $tax   Taxonomy name
+ * @return array List of slugs
+ * @since  2.7.1
+ */
+
+if ( !function_exists( 'vce_get_tax_term_slug_by_name' ) ):
+	function vce_get_tax_term_slug_by_name( $names, $tax = 'post_tag' ) {
+
+		if ( empty( $names ) ) {
+			return '';
+		}
+
+		$slugs = array();
+		$names = explode( ",", $names );
+
+		foreach ( $names as $name ) {
+			$tag = get_term_by( 'name', trim( $name ), $tax );
+
+			if ( !empty( $tag ) && isset( $tag->slug ) ) {
+				$slugs[] = $tag->slug;
+			}
+		}
+
+		return $slugs;
+
+	}
+endif;
