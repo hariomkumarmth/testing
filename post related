@@ -1,0 +1,213 @@
+/* Get post format icon */
+if ( !function_exists( 'vce_post_format_icon' ) ):
+	function vce_post_format_icon( $layout = '' ) {
+
+		if ( vce_get_option( $layout.'_icon' ) ) {
+			$format = get_post_format();
+
+			$icons = array(
+				'video' => 'fa-play',
+				'audio' => 'fa-music',
+				'image' => 'fa-camera',
+				'gallery' => 'fa-picture-o'
+			);
+
+			//Allow plugins or child themes to modify icons
+			$icons = apply_filters( 'vce_post_format_icons', $icons );
+
+			if ( $format && array_key_exists( $format, $icons ) ) {
+				return $icons[$format];
+			}
+		}
+
+		return false;
+	}
+endif;
+----------------
+/* Get related posts for particular post */
+if ( !function_exists( 'vce_get_related_posts' ) ):
+	function vce_get_related_posts( $post_id = false ) {
+
+		if ( empty( $post_id ) ) {
+			$post_id = get_the_id();
+		}
+
+		$args['post_type'] = 'post';
+
+		//Exclude current post form query
+		$args['post__not_in'] = array( $post_id );
+
+		//If previuos next posts active exclude them too
+		if ( vce_get_option( 'show_prev_next' ) ) {
+			$in_same_cat = vce_get_option( 'prev_next_cat' ) ? true : false;
+			$prev = get_previous_post( $in_same_cat );
+
+			if ( !empty( $prev ) ) {
+				$args['post__not_in'][] = $prev->ID;
+			}
+			$next = get_next_post( $in_same_cat );
+			if ( !empty( $next ) ) {
+				$args['post__not_in'][] = $next->ID;
+			}
+		}
+
+		$num_posts = absint( vce_get_option( 'related_limit' ) );
+		if ( $num_posts > 100 ) {
+			$num_posts = 100;
+		}
+		$args['posts_per_page'] = $num_posts;
+		$args['orderby'] = vce_get_option( 'related_order' );
+
+		if ( $args['orderby'] == 'views' && function_exists( 'ev_get_meta_key' ) ) {
+
+			$args['orderby'] = 'meta_value_num';
+			$args['meta_key'] = ev_get_meta_key();
+
+		} else if ( strpos( $args['orderby'], 'reviews' ) !== false && vce_is_wp_review_active() ) {
+
+				if ( strpos( $args['orderby'], 'user' ) !== false ) {
+
+					$review_type = substr( $args['orderby'], 13, strlen( $args['orderby'] ) );
+
+					$args['orderby'] = 'meta_value_num';
+					$args['meta_key'] = 'wp_review_user_reviews';
+
+					$args['meta_query'] = array(
+						array(
+							'key'     => 'wp_review_user_review_type',
+							'value'   => $review_type,
+						)
+					);
+
+				} else {
+
+					$review_type = substr( $args['orderby'], 8, strlen( $args['orderby'] ) );
+
+					$args['orderby'] = 'meta_value_num';
+					$args['meta_key'] = 'wp_review_total';
+
+					$args['meta_query'] = array(
+						array(
+							'key'     => 'wp_review_type',
+							'value'   => $review_type,
+						)
+					);
+				}
+
+			}
+
+		if ( $args['orderby'] == 'comments_number' ) {
+			$args['orderby'] = 'comment_count';
+		}
+
+		if ( $args['orderby'] == 'title' ) {
+			$args['order'] = 'ASC';
+		}
+
+		if ( $time_diff = vce_get_option( 'related_time' ) ) {
+			$args['date_query'] = array( 'after' => date( 'Y-m-d', vce_calculate_time_diff( $time_diff ) ) );
+		}
+
+		if ( $type = vce_get_option( 'related_type' ) ) {
+			switch ( $type ) {
+
+			case 'cat':
+				$cats = get_the_category( $post_id );
+				$cat_args = array();
+				if ( !empty( $cats ) ) {
+					foreach ( $cats as $k => $cat ) {
+						$cat_args[] = $cat->term_id;
+					}
+				}
+				$args['category__in'] = $cat_args;
+				break;
+
+			case 'tag':
+				$tags = get_the_tags( $post_id );
+				$tag_args = array();
+				if ( !empty( $tags ) ) {
+					foreach ( $tags as $tag ) {
+						$tag_args[] = $tag->term_id;
+					}
+				}
+				$args['tag__in'] = $tag_args;
+				break;
+
+			case 'cat_and_tag':
+				$cats = get_the_category( $post_id );
+				$cat_args = array();
+				if ( !empty( $cats ) ) {
+					foreach ( $cats as $k => $cat ) {
+						$cat_args[] = $cat->term_id;
+					}
+				}
+				$tags = get_the_tags( $post_id );
+				$tag_args = array();
+				if ( !empty( $tags ) ) {
+					foreach ( $tags as $tag ) {
+						$tag_args[] = $tag->term_id;
+					}
+				}
+				$args['tax_query'] = array(
+					'relation' => 'AND',
+					array(
+						'taxonomy' => 'category',
+						'field'    => 'id',
+						'terms'    => $cat_args,
+					),
+					array(
+						'taxonomy' => 'post_tag',
+						'field'    => 'id',
+						'terms'    => $tag_args,
+					)
+				);
+				break;
+
+			case 'cat_or_tag':
+				$cats = get_the_category( $post_id );
+				$cat_args = array();
+				if ( !empty( $cats ) ) {
+					foreach ( $cats as $k => $cat ) {
+						$cat_args[] = $cat->term_id;
+					}
+				}
+				$tags = get_the_tags( $post_id );
+				$tag_args = array();
+				if ( !empty( $tags ) ) {
+					foreach ( $tags as $tag ) {
+						$tag_args[] = $tag->term_id;
+					}
+				}
+				$args['tax_query'] = array(
+					'relation' => 'OR',
+					array(
+						'taxonomy' => 'category',
+						'field'    => 'id',
+						'terms'    => $cat_args,
+					),
+					array(
+						'taxonomy' => 'post_tag',
+						'field'    => 'id',
+						'terms'    => $tag_args,
+					)
+				);
+				break;
+
+			case 'author':
+				global $post;
+				$author_id = isset( $post->post_author ) ? $post->post_author : 0;
+				$args['author'] = $author_id;
+				break;
+
+			case 'default':
+				break;
+			}
+		}
+
+		$args = apply_filters( 'vce_modify_related_posts_query_args', $args );
+
+		$related_query = new WP_Query( $args );
+
+		return $related_query;
+	}
+endif;
