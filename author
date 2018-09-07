@@ -1,0 +1,63 @@
+/**
+ * Get authors IDs by author username
+ *
+ * @param array   $slugs List of term slugs
+ * @return array List of author IDs
+ * @since  2.3  ( R.J. )
+ */
+
+if ( !function_exists( 'vce_get_authors_id_by_username' ) ):
+	function vce_get_authors_id_by_username( $names ) {
+
+		if ( empty( $names ) ) {
+			return '';
+		}
+		$names = explode( ",", $names );
+		$ids = array();
+		foreach ( $names as $name ) {
+
+			$meta = get_user_by( 'login', $name );
+			if ( !empty( $meta ) ) {
+				$ids[] = $meta->ID;
+			}
+		}
+
+		return $ids;
+
+	}
+endif;
+---------------
+/**
+ * Get authors username by author ID
+ *
+ * @param array   $slugs List of term slugs
+ * @return array List of author IDs
+ * @since  2.3 ( R.J. )
+ */
+
+if ( !function_exists( 'vce_get_authors_username_by_id' ) ):
+	function vce_get_authors_username_by_id( $ids ) {
+
+		if ( empty( $ids ) ) {
+			return '';
+		}
+
+		$names = array();
+
+		foreach ( $ids as $id ) {
+
+			$meta = get_user_by( 'ID', $id );
+			if ( !empty( $meta ) ) {
+				$names[] = $meta->user_login;
+			}
+		}
+
+		$names = implode( ",", $names );
+		return $names;
+
+	}
+endif;
+
+
+---------------
+
