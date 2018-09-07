@@ -1,0 +1,18 @@
+
+/* Get image id by url */
+if ( !function_exists( 'vce_get_image_id_by_url' ) ):
+	function vce_get_image_id_by_url( $image_url ) {
+		global $wpdb;
+
+		$attachment = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid='%s';", $image_url ) );
+
+		if ( isset( $attachment[0] ) ) {
+			return $attachment[0];
+		}
+
+		return false;
+	}
+endif;
+
+/* Get image id byId */
+wp_get_attachment_image( $img_id, $size );
