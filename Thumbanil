@@ -16,3 +16,6 @@ endif;
 
 /* Get image id byId */
 wp_get_attachment_image( $img_id, $size );
+//get single image url 
+$get_featured_image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID), 'full' );
+$featured_image = $get_featured_image[0];
