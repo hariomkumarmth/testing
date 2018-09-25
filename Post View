@@ -1,0 +1,35 @@
+/**************************/
+/*		Post View
+/**************************/
+
+function easyweb_webnus_setViews($postID) {
+    $count_key = 'easyweb_webnus_views';
+    $count = get_post_meta($postID, $count_key, true);
+    if($count==''){
+        $count = 0;
+        delete_post_meta($postID, $count_key);
+        add_post_meta($postID, $count_key, '0');
+    }else{
+        $count++;
+        update_post_meta($postID, $count_key, $count);
+    }
+    return $count;
+}
+function easyweb_webnus_getViews($postID) {
+    $count_key = 'easyweb_webnus_views';
+    $count = get_post_meta($postID, $count_key, true);
+    if($count==''){
+        $count = 0;
+        delete_post_meta($postID, $count_key);
+        add_post_meta($postID, $count_key, '0');
+	}
+    return $count;
+}
+
+
+---------------
+
+single .php
+<?php easyweb_webnus_setViews(get_the_ID()); ?>
+<?php echo easyweb_webnus_getViews(get_the_ID()); ?>
+-------------
