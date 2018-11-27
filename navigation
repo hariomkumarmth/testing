@@ -1,0 +1,38 @@
+<?php
+    wp_nav_menu(
+          array(
+          'theme_location' => 'primary',
+          'menu_id'        => 'primary-menu',
+          'fallback_cb'    => 'business_era_primary_navigation_fallback',
+          )
+    );
+    ?>
+
+            
+--------------
+            
+if ( ! function_exists( 'business_era_primary_navigation_fallback' ) ) :
+
+	/**
+	 * Fallback for primary navigation.
+	 *
+	 * @since 1.0.0
+	 */
+	function business_era_primary_navigation_fallback() {
+		echo '<ul>';
+		echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html_e( 'Home', 'business-era' ) . '</a></li>';
+		$args = array(
+			'number'       => 6,
+			'hierarchical' => false,
+			);
+		$pages = get_pages( $args );
+		if ( is_array( $pages ) && ! empty( $pages ) ) {
+			foreach ( $pages as $page ) {
+				echo '<li><a href="' . esc_url( get_permalink( $page->ID ) ) . '">' . esc_html( get_the_title( $page->ID ) ) . '</a></li>';
+			}
+		}
+		echo '</ul>';
+
+	}
+
+endif;
