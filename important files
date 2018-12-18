@@ -1,2 +1,57 @@
 // Title
 <?php the_title( sprintf( '<h3 class="entry-title"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ),	'</a></h3>' ); ?>
+
+ --------------------------------------  
+//the_excerpt
+<?php 
+    if(has_excerpt()){
+      the_excerpt();
+    }else{
+      echo esc_html( prominimal_excerpt( get_the_content() , 100  ) );
+    }
+    ?> 
+
+//  excerpt length 
+if( !function_exists( 'prominimal_excerpt' ) ){
+	function prominimal_excerpt( $content , $letter_count ){
+		$content = strip_shortcodes( $content );
+		$content = strip_tags( $content );
+		$content = mb_substr( $content, 0 , $letter_count );
+
+		if( strlen( $content ) == $letter_count ){
+			$content .= "...";
+		}
+		return $content;
+	}
+}
+ --------------------------------------   
+    
+    
+    //Read more 
+    <a href="<?php the_permalink(); ?>"> <?php echo esc_html__( 'Read More ' , 'pro-minimal' ); ?></a>
+ --------------------------------------  
+ 
+ 
+/* theme credit */
+
+if (!function_exists( 'prominimal_credit_info' ) ):
+
+	function prominimal_credit_info() { ?>
+
+		<p>
+		<?php
+		$proLink = 'https://www.thehtmlcoder.com/';
+			/* translators: its shows developer url */
+			printf(esc_html__( 'Powered by %1$s | Developed by %2$s', 'pro-minimal' ), ' <a target="_blank" href="https://wordpress.org/" >WordPress </a>', '<a href="' . esc_url( $proLink ) . '" rel="designer" target="_blank">TheHTMLCoder.com</a>' );
+		?>
+		</p><!-- .site-info -->
+
+	<?php
+	}
+
+endif;
+
+add_action( 'prominimal_credit', 'prominimal_credit_info', 10 );
+
+--------------------------------------------------
+
